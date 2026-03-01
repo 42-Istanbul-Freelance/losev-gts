@@ -1,0 +1,101 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ─────────────────────────────────────────────
+// KULLANICI
+// ─────────────────────────────────────────────
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  passwordHash      String
+  role              String   // "STUDENT" | "TEACHER" | "HQ"
+  fullName          String
+  phone             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Öğrenci alanları
+  tcNo              String?
+  grade             String?           // Sınıf: "9", "10", "11", "12"
+  coordinatorName   String?           // Koordinatör öğretmen adı
+
+  // Ortak ilişkiler
+  schoolId          String?
+  school            School?  @relation(fields: [schoolId], references: [id])
+  city              String?           // İl
+  district          String?           // İlçe
+
+  // İlişkiler
+  activities        Activity[]        // Öğrencinin faaliyetleri
+  reviews           ActivityReview[]  // Öğretmenin yaptığı incelemeler
+
+  @@index([role])
+  @@index([schoolId])
+  @@index([city])
+}
+
+// ─────────────────────────────────────────────
+// OKUL
+// ─────────────────────────────────────────────
+model School {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  city      String
+  district  String
+  createdAt DateTime @default(now())
+
+  users     User[]
+
+  @@index([city])
+}
+
+// ─────────────────────────────────────────────
+// FAALİYET
+// ─────────────────────────────────────────────
+model Activity {
+  id            String   @id @default(cuid())
+  date          DateTime                    // Faaliyet tarihi
+  type          String                      // "SEMINAR" | "STAND" | "DONATION" | "FAIR" | "SOCIAL_MEDIA" | "OTHER"
+  hours         Float                       // Harcanan saat (max 8)
+  description   String                      // Kısa açıklama
+  attachmentUrl String?                     // Fotoğraf/belge URL
+  status        String   @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // İlişkiler
+  studentId     String
+  student       User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  review        ActivityReview?
+
+  @@index([studentId])
+  @@index([status])
+  @@index([date])
+  @@index([type])
+}
+
+// ─────────────────────────────────────────────
+// FAALİYET İNCELEME (Öğretmen Onayı)
+// ─────────────────────────────────────────────
+model ActivityReview {
+  id          String   @id @default(cuid())
+  decision    String                        // "APPROVED" | "REJECTED"
+  note        String?                       // Geri bildirim notu
+  reviewedAt  DateTime @default(now())
+
+  // İlişkiler
+  activityId  String   @unique
+  activity    Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  reviewerId  String
+  reviewer    User     @relation(fields: [reviewerId], references: [id])
+
+  @@index([reviewerId])
+}
