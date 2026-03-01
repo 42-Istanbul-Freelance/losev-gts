@@ -9,6 +9,9 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+# macOS system files
+._*
+.DS_Store
 
 # testing
 /coverage
