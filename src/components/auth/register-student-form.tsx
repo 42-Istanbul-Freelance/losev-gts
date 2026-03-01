@@ -28,8 +28,9 @@ import Link from "next/link"
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
 
 type School = { id: string; name: string }
+type Teacher = { id: string; fullName: string; schoolId: string | null }
 
-export function RegisterStudentForm({ schools }: { schools: School[] }) {
+export function RegisterStudentForm({ schools, teachers }: { schools: School[], teachers: Teacher[] }) {
   const [error, setError] = useState<string | undefined>("")
   const [success, setSuccess] = useState<string | undefined>("")
   const [isPending, setIsPending] = useState(false)
@@ -49,6 +50,10 @@ export function RegisterStudentForm({ schools }: { schools: School[] }) {
       district: "",
     },
   })
+
+  // Seçilen okulu dinleyerek öğretmenleri filtrele
+  const selectedSchoolId = form.watch("schoolId")
+  const availableTeachers = teachers.filter(t => t.schoolId === selectedSchoolId)
 
   async function onSubmit(values: z.infer<typeof studentRegisterSchema>) {
     setError("")
@@ -216,10 +221,29 @@ export function RegisterStudentForm({ schools }: { schools: School[] }) {
                 name="coordinatorName"
                 render={({ field }) => (
                   <FormItem className="md:col-span-2">
-                    <FormLabel>Koordinatör Öğretmen Adı</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Öğretmeninizin adı ve soyadı" disabled={isPending} {...field} />
-                    </FormControl>
+                    <FormLabel>Koordinatör Öğretmen</FormLabel>
+                    <Select 
+                      disabled={isPending || !selectedSchoolId || availableTeachers.length === 0} 
+                      onValueChange={field.onChange} 
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={
+                            !selectedSchoolId ? "Önce okulunuzu seçin" :
+                            availableTeachers.length === 0 ? "Bu okulda henüz öğretmen yok" :
+                            "Öğretmeninizi seçin"
+                          } />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {availableTeachers.map(teacher => (
+                          <SelectItem key={teacher.id} value={teacher.fullName}>
+                            {teacher.fullName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
