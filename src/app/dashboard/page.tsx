@@ -4,6 +4,8 @@ import { StudentOverview } from "@/components/dashboard/student-overview"
 
 import { TeacherOverview } from "@/components/dashboard/teacher-overview"
 
+import { HQOverview } from "@/components/dashboard/hq-overview"
+
 export default async function DashboardPage() {
   const session = await auth()
 
@@ -22,12 +24,7 @@ export default async function DashboardPage() {
   }
 
   if (role === "HQ") {
-    return (
-      <div className="flex h-[50vh] flex-col items-center justify-center p-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-800">Genel Merkez Paneli</h2>
-        <p className="mt-2 text-gray-500">Çok yakında hizmetinizde.</p>
-      </div>
-    )
+    return <HQOverview user={session.user} />
   }
 
   return <div>Yetkisiz erişim.</div>

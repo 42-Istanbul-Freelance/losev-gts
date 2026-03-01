@@ -14,6 +14,7 @@ import {
   Building2,
   Trophy,
   PieChart,
+  FileBadge,
 } from "lucide-react"
 
 type Role = "STUDENT" | "TEACHER" | "HQ"
@@ -33,7 +34,7 @@ export function Sidebar({ userRole }: SidebarProps) {
       { name: "Özet", href: "/", icon: LayoutDashboard },
       { name: "Faaliyet Ekle", href: "/activity/new", icon: PlusCircle },
       { name: "Faaliyetlerim", href: "/activity/history", icon: History },
-      { name: "Rozetlerim", href: "/badges", icon: Award },
+      { name: "Sertifika", href: "/certificate", icon: FileBadge },
     ],
     TEACHER: [
       { name: "Özet", href: "/", icon: LayoutDashboard },
